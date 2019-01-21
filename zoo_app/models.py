@@ -30,7 +30,7 @@ class AnimalInfo(models.Model):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
     category = models.IntegerField(choices=categories, default=0)
     titele = models.CharField(max_length=32)
-    content = models.CharField(max_length=4096)
+    content = models.TextField()
     disp_order_no = models.IntegerField(default=0)
     update_date_time = models.DateField(default=date.today)
 

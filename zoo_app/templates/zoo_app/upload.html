@@ -1,0 +1,33 @@
+{% extends 'zoo_app/base.html' %}
+
+{% block content %}
+  <form method="POST" action={% url 'upload' %}  enctype="multipart/form-data">{% csrf_token %}
+    <div class="file-field input-field" style="font-size:2vw;">
+        <div class="btn-large">
+          <span>動物の画像を選択</span>
+          {{form.file}}
+        </div>
+        <div class="file-path-wrapper">
+          <input class="file-path validate" type="text" onchange="submit();"/>
+        </div>
+    </div>
+  </form>
+  {% if animal %}
+    <div class="row">
+      <span class="col s12" style="font-size:3vw">
+      {{ animal.name }}
+      </span>
+      <img style="display: block; margin-left: auto; margin-right: auto; width: 60%;" src='{{ image }}' name = 'inputImage'>
+    </div>
+  {% endif %}
+  <table style="font-size:2vw">
+      <tbody>
+      {% for info in animalinfo %}
+        <tr>
+          <th>{{info.titele}}</th>
+          <td>{{info.content}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+{% endblock %}
