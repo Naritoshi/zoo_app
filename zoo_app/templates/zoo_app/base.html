@@ -2,25 +2,43 @@
 <html lang="ja" dir="ltr">
   <head>
     <!-- materialize CSSのCDN経由での読み込み -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}動物識別アプリ{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+    <script src="{% static "script.js" %}"></script>
   </head>
   <body>
     <nav>
       <div class="nav-wrapper teal">
         <div class="col s12">
-          <a href="#" class="brand-logo" style="font-size:3vw">動物識別アプリ</a>
+          <a href="./" class="brand-logo" style="font-size:4vw;margin:0 1vw;">動物識別アプリ</a>
         </div>
       </div>
+      <!-- ログアウト機能の追加 -->
+      {% if user.is_authenticated %}
+        <span class="col s6" style="font-size:20px; text-align: right;">
+          <a href="{% url 'logout' %}" style="color:white; text-decoration: underline;">
+          こんにちは、{{ user.username}}
+          </a>
+        </span>
+      {% endif %}
     </nav>
+    {% if error_msg %}
+    <div class="contents" style="margin:0 10%">{{error_msg}}</div>
+    {% endif %}
     <div class="contents" style="margin:0 10%">
       {% block content %}
 
       {% endblock %}
 
     </div>
+    {% block js %}
+
+    {% endblock %}
   </body>
 </html>

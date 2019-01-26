@@ -1,50 +1,27 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-from .forms import UploadFileForm
-import os
-import numpy as np
-import base64
-from PIL import Image
+from django.contrib.auth.decorators import login_required
 
-import chainer
-import chainer.links as L
-from .GoogleNet import GoogleNet
-
+from .util import util
+from .ml import predict
 from .models import Animal, AnimalInfo
 
-model_path = 'zoo_app/zoo_model.npz'
+trained_model =  predict.get_trained_model()
 
-trained_model =  L.Classifier(GoogleNet())
-chainer.serializers.load_npz(model_path, trained_model)
-
-def predict(model, path):
-    x = Image.open(path)
-    x = x.resize((224,224))
-    x = np.array(x, dtype='f')
-    x = x.transpose(2, 0, 1)
-    x = x[np.newaxis, ...]
-    y = model.predictor(x)[0]
-    y = np.argmax(y.array)
-    animal = Animal.objects.all().filter(id=y)[0]
-    return animal
-
-def upload(request):
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
-        file_obj = request.FILES['file']
-
-        if form.is_valid():
-            encoded = base64.b64encode(file_obj.read()).decode()
-            mime = "image/jpg"
-            mime = mime + ";" if mime else ";"
-            input_image = "data:%sbase64,%s" % (mime, encoded)  
-            print(input_image)
-            animal = predict(trained_model, file_obj)
+#@login_required
+def main(request):
+    if request.method == 'POST' and request.FILES['file']:
+        if util.get_extntion(request.FILES['file'].name).upper() == '.JPG':
+            #表示用の画像形式にする
+            input_image = util.create_image_data(request.FILES['file'].read())
+            #予測する
+            y = predict.predict(trained_model, request.FILES['file'])
+            #ラベルにあった動物を取得する
+            animal = Animal.objects.all().filter(id=y)[0]
+            #動物にあった文言を取得する
             animalinfo = AnimalInfo.objects.all().filter(animal=animal)
-            return render(request, 'zoo_app/upload.html', {'form': form,  'image':input_image ,'animal': animal, 'animalinfo': animalinfo})
+            return render(request, 'zoo_app/main.html', {'image':input_image ,'animal': animal, 'animalinfo': animalinfo})
         else:
-            return HttpResponse('invalid form')
+            return render(request, 'zoo_app/main.html', {'error_msg': '拡張子は、JPGのみ対応しています。'})
     else:
-        form = UploadFileForm()
-    return render(request, 'zoo_app/upload.html', {'form': form})
-
+        return render(request, 'zoo_app/main.html')
